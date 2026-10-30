@@ -3,6 +3,13 @@ server:
 spring:
   application:
     name: gateway-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Cles lues dans le reseau Docker, emetteur tel que vu par le navigateur.
+          jwk-set-uri: ${KEYCLOAK_JWKS_URL:http://localhost:18180/realms/adria-bank/protocol/openid-connect/certs}
+          issuer-uri: ${KEYCLOAK_ISSUER:http://localhost:18180/realms/adria-bank}
   cloud:
     gateway:
       server:
@@ -43,3 +50,6 @@ management:
     web:
       exposure:
         include: health,info
+bank:
+  security:
+    enabled: ${SECURITY_ENABLED:false}

@@ -37,6 +37,22 @@ docker compose up -d --build
 
 Ouvrir **http://localhost:15173**. Le premier build télécharge les dépendances et prend quelques minutes. Les tests ne sont pas exécutés dans Docker.
 
+**Connexion (Keycloak).** Avec Docker, l'application redirige vers une page de connexion Keycloak aux couleurs d'ADRIA Bank, et la gateway refuse toute requête `/api` sans jeton (HTTP 401).
+
+| Utilisateur | Mot de passe |
+|---|---|
+| `demo` | `demo123` |
+| `conseiller` | `conseiller123` |
+
+Console d'administration : **http://localhost:18180/admin** (`admin` / `admin`), realm `adria-bank`. Le realm, les clients et les utilisateurs sont importés depuis `keycloak/realm/` au premier démarrage ; le thème de connexion se trouve dans `keycloak/themes/adria/`. Pour appeler l'API à la main, obtenir un jeton avec le client `adria-cli` :
+
+```powershell
+$t = Invoke-RestMethod -Method POST http://localhost:18180/realms/adria-bank/protocol/openid-connect/token -Body @{ grant_type='password'; client_id='adria-cli'; username='demo'; password='demo123' }
+Invoke-RestMethod http://localhost:19080/api/accounts -Headers @{ Authorization = "Bearer $($t.access_token)" }
+```
+
+Avec `LANCER.ps1`, Keycloak n'est pas lancé : l'application reste accessible sans connexion, comme avant.
+
 Options (copier `.env.example` en `.env` et le remplir) :
 
 ```powershell
@@ -86,6 +102,7 @@ Le frontend s'arrête avec `Ctrl+C`. Les logs du backend se trouvent dans `.loca
 | chatbot-service | 19083 | Gemini et outils MCP ; client REST |
 | event-consumer | 19084 | Journalisation des événements Kafka |
 | frontend | 15173 | Comptes, paiements, virements, assistant |
+| keycloak (Docker) | 18180 | Connexion, jetons JWT vérifiés par la gateway |
 
 Les contrôleurs REST, GraphQL et les outils MCP utilisent la même couche `service`. Les données de démonstration comprennent deux comptes MAD et un compte EUR. Les bases H2 sont en mémoire : arrêter et relancer **les deux services métier ensemble** réinitialise la démonstration.
 

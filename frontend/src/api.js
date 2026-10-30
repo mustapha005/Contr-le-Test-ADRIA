@@ -1,7 +1,9 @@
+import { authHeaders } from './auth';
+
 export async function request(path, options = {}) {
   const response = await fetch(`/api${path}`, {
     ...options,
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: { 'Content-Type': 'application/json', ...(await authHeaders()), ...options.headers },
   });
   const text = await response.text();
   let data;

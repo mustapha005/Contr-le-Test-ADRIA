@@ -1,10 +1,24 @@
-param([string]$Gateway = 'http://localhost:19080')
+param(
+    [string]$Gateway = 'http://localhost:19080',
+    [string]$Keycloak = 'http://localhost:18180',
+    [string]$User = 'demo',
+    [string]$Password = 'demo123'
+)
 # Ajoute des clients, paiements et virements de demonstration via la gateway.
 # Les bases H2 sont en memoire : relancer ce script apres chaque redemarrage.
 $ErrorActionPreference = 'Stop'
 
+# Avec Docker, la gateway exige un jeton Keycloak ; avec LANCER.ps1, Keycloak est absent.
+$headers = @{}
+try {
+    $token = Invoke-RestMethod -Method POST "$Keycloak/realms/adria-bank/protocol/openid-connect/token" -TimeoutSec 5 `
+        -Body @{ grant_type = 'password'; client_id = 'adria-cli'; username = $User; password = $Password }
+    $headers.Authorization = "Bearer $($token.access_token)"
+    Write-Host "Connecte a Keycloak en tant que $User."
+} catch { Write-Host 'Keycloak indisponible : appels sans jeton.' }
+
 function Invoke-Bank([string]$method, [string]$path, $body) {
-    $params = @{ Method = $method; Uri = "$Gateway$path"; ContentType = 'application/json'; TimeoutSec = 15 }
+    $params = @{ Method = $method; Uri = "$Gateway$path"; ContentType = 'application/json'; TimeoutSec = 15; Headers = $headers }
     if ($body) { $params.Body = ($body | ConvertTo-Json -Compress) }
     # PowerShell 5.1 renvoie un tableau JSON comme un seul objet : on le deroule.
     Invoke-RestMethod @params | ForEach-Object { $_ }

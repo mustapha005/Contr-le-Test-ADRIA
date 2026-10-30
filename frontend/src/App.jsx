@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from './api';
+import { authEnabled, currentUser, logout } from './auth';
 import Accounts from './components/Accounts';
 import Transactions from './components/Transactions';
 import Transfer from './components/Transfer';
@@ -39,7 +40,7 @@ export default function App() {
   }
 
   return <>
-    <header className="topbar"><div className="brand"><span className="brand-mark">A</span><div>ADRIA <strong>Bank</strong><small>Gestion bancaire · TP</small></div></div><span className="demo-label">Environnement de démonstration</span></header>
+    <header className="topbar"><div className="brand"><span className="brand-mark">A</span><div>ADRIA <strong>Bank</strong><small>Gestion bancaire · TP</small></div></div><div className="topbar-actions"><span className="demo-label">Environnement de démonstration</span>{authEnabled && <><span className="user-name">{currentUser()}</span><button className="secondary compact" onClick={logout}>Se déconnecter</button></>}</div></header>
     <main>
       <div className="page-heading"><div><p className="eyebrow">ESPACE BANCAIRE</p><h1>Comptes & opérations</h1><p className="muted">Consultez les soldes et gérez les opérations bancaires.</p></div><button className="secondary" onClick={reload} disabled={loading || busy}>{loading ? 'Chargement…' : 'Actualiser'}</button></div>
       <div className="stats"><div><span>Comptes</span><strong>{accounts.length}</strong></div><div><span>Comptes actifs</span><strong>{accounts.filter((a) => a.status === 'ACTIVE').length}</strong></div><div><span>Transactions</span><strong>{transactions.length}</strong></div><div><span>Plafond par opération</span><strong>{maxAmount.toLocaleString('fr-FR')} <small>/ devise</small></strong></div></div>

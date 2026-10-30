@@ -1,0 +1,49 @@
+/* Page de connexion Keycloak aux couleurs de frontend/src/styles.css. */
+* { box-sizing: border-box; }
+html { font-family: Arial, Helvetica, sans-serif; color: #1e302c; background: #f5f7f6; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: #f5f7f6; }
+body > div { width: 100%; max-width: 400px; }
+
+/* Marque : meme pastille "A" que la barre du haut de l'application. */
+#kc-header { margin-bottom: 22px; }
+#kc-header-wrapper { display: flex; align-items: center; justify-content: center; gap: 12px; letter-spacing: 1px; font-size: 20px; font-weight: 700; color: #1e302c; }
+#kc-header-wrapper::before { content: "A"; background: #174b40; color: #fff; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 8px; font-size: 24px; letter-spacing: 0; }
+
+/* Carte du formulaire. */
+body > div > div:nth-child(2) { background: #fff; border: 1px solid #dfe6e1; border-radius: 8px; padding: 28px 26px; }
+header { margin-bottom: 22px; }
+#kc-page-title { margin: 0; font-size: 21px; letter-spacing: -.4px; font-weight: 700; text-align: left; }
+#kc-page-title::before { content: "ESPACE BANCAIRE"; display: block; color: #5c8070; font-size: 11px; letter-spacing: 1.7px; margin-bottom: 10px; }
+
+label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 7px; }
+#kc-form-login > div { margin-bottom: 17px; }
+input[type="text"], input[type="password"], input[type="email"] {
+  display: block; width: 100%; padding: 10px 11px; border: 1px solid #ccd7d0; border-radius: 5px;
+  color: #233c30; background: #fff; font: inherit;
+}
+input:focus-visible, button:focus-visible { outline: 3px solid #80b6a2; outline-offset: 2px; }
+input[aria-invalid="true"] { border-color: #e2b4a6; background: #fff8f6; }
+/* Le theme "base" n'a pas d'icones : bouton afficher/masquer retire. */
+[data-password-toggle] { display: none; }
+
+#kc-form-buttons { margin: 6px 0 0; }
+#kc-login, input[type="submit"] {
+  width: 100%; border: 1px solid transparent; border-radius: 6px; background: #174b40; color: #fff;
+  padding: 11px 17px; cursor: pointer; font: inherit; font-weight: 600;
+}
+#kc-login:hover, input[type="submit"]:hover { background: #103b32; }
+#kc-login:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Messages : memes couleurs que .notice.error / .notice.success. */
+[class*="alert-"] { padding: 14px 17px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; line-height: 1.6; }
+.alert-error { background: #fff0ec; color: #9e3c2b; border: 1px solid #f0d3ca; }
+.alert-warning { background: #fff8e8; color: #7a5a1c; border: 1px solid #efdfb8; }
+.alert-success, .alert-info { background: #eaf5ed; color: #286a43; border: 1px solid #c8e0cd; }
+#input-error, [id^="input-error"] { display: block; color: #9e3c2b; font-size: 12px; margin-top: 7px; }
+
+a { color: #174b40; font-weight: 600; }
+#kc-info, #kc-registration { text-align: center; font-size: 13px; color: #6a7a72; margin-top: 18px; }
+#kc-locale { display: none; }
+
+/* Pied de page identique a l'application. */
+body > div::after { content: "ADRIA Bank \00B7 Application de TP \00B7 Donn\00E9 es de d\00E9 monstration"; display: block; color: #849187; font-size: 11px; text-align: center; padding-top: 22px; }

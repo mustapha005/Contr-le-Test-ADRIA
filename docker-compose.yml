@@ -13,6 +13,25 @@ x-healthcheck: &healthcheck
   start_period: 20s
 
 services:
+  # Authentification : realm, clients et utilisateurs importes depuis keycloak/realm.
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.0
+    command: ["start-dev", "--import-realm"]
+    restart: unless-stopped
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: http://localhost:18180
+      KC_HEALTH_ENABLED: "true"
+    ports: ["18180:8080"]
+    volumes:
+      - ./keycloak/realm:/opt/keycloak/data/import:ro
+      - ./keycloak/themes/adria:/opt/keycloak/themes/adria:ro
+    healthcheck:
+      <<: *healthcheck
+      # L'image ne contient pas curl : requete HTTP brute sur le port de management.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+
   discovery-service:
     <<: *backend
     build: { context: ., dockerfile: backend/Dockerfile, args: { SERVICE: discovery-service } }
@@ -65,14 +84,22 @@ services:
     build: { context: ., dockerfile: backend/Dockerfile, args: { SERVICE: gateway-service } }
     image: adria-bank/gateway-service
     ports: ["19080:19080"]
+    environment:
+      <<: *backend-env
+      SECURITY_ENABLED: "true"
+      KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/adria-bank/protocol/openid-connect/certs
+      KEYCLOAK_ISSUER: http://localhost:18180/realms/adria-bank
     depends_on:
       discovery-service: { condition: service_healthy }
+      keycloak: { condition: service_healthy }
     healthcheck:
       <<: *healthcheck
       test: ["CMD", "curl", "-fs", "http://localhost:19080/actuator/health"]
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args: { VITE_KEYCLOAK_URL: "http://localhost:18180" }
     image: adria-bank/frontend
     restart: unless-stopped
     ports: ["15173:80"]

@@ -1,0 +1,56 @@
+{
+  "realm": "adria-bank",
+  "enabled": true,
+  "displayName": "ADRIA Bank",
+  "loginTheme": "adria",
+  "sslRequired": "none",
+  "internationalizationEnabled": true,
+  "supportedLocales": ["fr"],
+  "defaultLocale": "fr",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": false,
+  "clients": [
+    {
+      "clientId": "adria-frontend",
+      "name": "ADRIA Bank",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "rootUrl": "http://localhost:15173",
+      "redirectUris": ["http://localhost:15173/*", "http://127.0.0.1:15173/*"],
+      "webOrigins": ["http://localhost:15173", "http://127.0.0.1:15173"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:15173/*##http://127.0.0.1:15173/*"
+      }
+    },
+    {
+      "clientId": "adria-cli",
+      "name": "Scripts ADRIA Bank",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "users": [
+    {
+      "username": "demo",
+      "enabled": true,
+      "email": "demo@adria.ma",
+      "emailVerified": true,
+      "firstName": "Client",
+      "lastName": "Demo",
+      "credentials": [{ "type": "password", "value": "demo123", "temporary": false }]
+    },
+    {
+      "username": "conseiller",
+      "enabled": true,
+      "email": "conseiller@adria.ma",
+      "emailVerified": true,
+      "firstName": "Conseiller",
+      "lastName": "ADRIA",
+      "credentials": [{ "type": "password", "value": "conseiller123", "temporary": false }]
+    }
+  ]
+}

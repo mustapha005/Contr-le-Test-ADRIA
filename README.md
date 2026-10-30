@@ -27,6 +27,25 @@ La clé privée n'est pas incluse dans l'archive. Les outils MCP locaux ne néce
 
 Pour arrêter toute l'application : ` .\ARRETER.ps1 `. Pour les lancements suivants, sans modification du code : ` .\LANCER.ps1 -SkipBuild ` (ajouter `-WithAi` pour l'assistant). Si une ancienne copie tourne déjà sur cet ordinateur, l'arrêter depuis son propre dossier avant de lancer la nouvelle copie.
 
+### Lancer avec Docker Desktop
+
+Prérequis : Docker Desktop démarré. Java, Maven et Node.js ne sont pas nécessaires. Arrêter d'abord une instance locale (` .\ARRETER.ps1 `), car les ports sont les mêmes.
+
+```powershell
+docker compose up -d --build
+```
+
+Ouvrir **http://localhost:15173**. Le premier build télécharge les dépendances et prend quelques minutes. Les tests ne sont pas exécutés dans Docker.
+
+Options (copier `.env.example` en `.env` et le remplir) :
+
+```powershell
+docker compose --profile ai up -d --build      # chatbot Gemini, GEMINI_API_KEY dans .env
+docker compose --profile kafka up -d --build   # Kafka + event-consumer, KAFKA_ENABLED=true dans .env
+```
+
+Logs : `docker compose logs -f transaction-service`. Arrêt : `docker compose down` (ajouter les mêmes `--profile` si utilisés). Les bases H2 sont en mémoire : les données repartent de zéro à chaque redémarrage. Pour recharger des clients, paiements et virements de démonstration : ` .\scripts\seed-data.ps1 ` (fonctionne aussi avec `LANCER.ps1`).
+
 ### Lancement séparé du backend et du frontend
 
 Depuis la racine, dans PowerShell :

@@ -1,0 +1,10 @@
+**/node_modules
+**/target
+**/dist
+.local
+.work
+.git
+.idea
+.vscode
+.env
+*.log

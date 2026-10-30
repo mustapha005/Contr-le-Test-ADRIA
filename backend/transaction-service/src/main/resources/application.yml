@@ -1,10 +1,10 @@
 server:
-  port: 8082
+  port: 19082
 spring:
   application:
     name: transaction-service
   config:
-    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:19888}
   datasource:
     url: jdbc:h2:mem:transactiondb;DB_CLOSE_DELAY=-1
     username: sa
@@ -25,7 +25,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+      defaultZone: ${EUREKA_URL:http://localhost:19761/eureka/}
   instance:
     prefer-ip-address: true
 management:

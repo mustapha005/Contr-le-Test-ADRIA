@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: 19084
 spring:
   application:
     name: event-consumer

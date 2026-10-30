@@ -1,0 +1,33 @@
+flowchart LR
+    User[Utilisateur] --> Web[Frontend React]
+    Web --> Gateway[Spring Cloud Gateway :8080]
+    RestClient[Client REST] --> Gateway
+
+    subgraph Business[Microservices metier]
+        Accounts[account-service :8081]
+        Transactions[transaction-service :8082]
+        AccountDB[(Base comptes H2)]
+        TransactionDB[(Base transactions H2)]
+        Accounts --> AccountDB
+        Transactions --> TransactionDB
+        Transactions -->|OpenFeign + Resilience4J| Accounts
+    end
+
+    Gateway -->|REST / GraphQL| Accounts
+    Gateway -->|REST / GraphQL| Transactions
+    Gateway --> Assistant[chatbot-service :8083]
+    Assistant -->|Spring AI| Gemini[Gemini API]
+    Assistant -->|MCP Streamable HTTP| Accounts
+    Assistant -->|MCP Streamable HTTP| Transactions
+
+    Transactions -->|TransactionCreated / cle accountId| Kafka[Kafka : bank.transactions.created]
+    Kafka --> Consumer[event-consumer :8084]
+    Consumer --> Logs[Journalisation seule]
+
+    Eureka[Eureka Discovery :8761] -. decouverte .-> Gateway
+    Eureka -. decouverte .-> Transactions
+    Accounts -. enregistrement .-> Eureka
+    Transactions -. enregistrement .-> Eureka
+    Assistant -. enregistrement .-> Eureka
+    Config[Config Server :8888] -. plafond partage 1000 .-> Accounts
+    Config -. plafond partage 1000 .-> Transactions

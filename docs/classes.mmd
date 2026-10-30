@@ -1,0 +1,54 @@
+classDiagram
+    class Account {
+        UUID id
+        String customerReference
+        AccountStatus status
+        String currency
+        BigDecimal balance
+        Long version
+    }
+    class AccountStatus {
+        <<enumeration>>
+        ACTIVE
+        BLOCKED
+    }
+    class BankTransaction {
+        UUID id
+        UUID accountId
+        UUID targetAccountId
+        BigDecimal amount
+        String currency
+        String merchantCategory
+        String country
+        Instant createdAt
+    }
+    class TransactionCreated {
+        UUID eventId
+        String eventType
+        UUID transactionId
+        UUID accountId
+        BigDecimal amount
+        String currency
+        Instant occurredAt
+    }
+    class AccountService {
+        list()
+        get(id)
+        create(input)
+        changeStatus(id, status)
+        debit(id, input)
+        transfer(input)
+    }
+    class TransactionService {
+        list(accountId)
+        get(id)
+        create(input)
+        transfer(input)
+    }
+    Account --> AccountStatus
+    Account "1" <-- "0..*" BankTransaction : compte source par UUID
+    Account "0..1" <-- "0..*" BankTransaction : beneficiaire du virement par UUID
+    AccountService --> Account
+    TransactionService --> BankTransaction
+    TransactionService ..> AccountService : OpenFeign
+    BankTransaction ..> TransactionCreated : evenement apres commit

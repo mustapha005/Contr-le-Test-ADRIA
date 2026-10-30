@@ -1,0 +1,72 @@
+server:
+  port: 8082
+spring:
+  application:
+    name: transaction-service
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+  datasource:
+    url: jdbc:h2:mem:transactiondb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+  graphql:
+    graphiql:
+      enabled: true
+  ai:
+    mcp:
+      server:
+        name: transaction-service
+        protocol: STREAMABLE
+        type: SYNC
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+bank:
+  transaction:
+    max-amount: 1000
+
+---
+spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          account-service:
+            connect-timeout: 2000
+            read-timeout: 3000
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+        max.block.ms: 3000
+        delivery.timeout.ms: 10000
+        request.timeout.ms: 3000
+bank:
+  kafka:
+    enabled: ${KAFKA_ENABLED:false}
+resilience4j:
+  circuitbreaker:
+    instances:
+      accounts:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 2
+        ignore-exceptions:
+          - feign.FeignException$FeignClientException

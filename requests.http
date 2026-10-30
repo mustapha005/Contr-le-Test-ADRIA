@@ -1,0 +1,79 @@
+@gateway = http://localhost:19080
+@accounts = http://localhost:19081
+@transactions = http://localhost:19082
+# Remplacer avec les UUID obtenus par GET /api/accounts.
+@sourceId = remplacer-uuid-source
+@targetId = remplacer-uuid-beneficiaire
+
+### Lister les comptes
+GET {{gateway}}/api/accounts
+
+### Créer un compte
+POST {{gateway}}/api/accounts
+Content-Type: application/json
+
+{"customerReference":"CLIENT-004","currency":"MAD","balance":1500.00}
+
+### Consulter un compte
+GET {{gateway}}/api/accounts/{{sourceId}}
+
+### Bloquer un compte (remplacer BLOCKED par ACTIVE pour réactiver)
+PATCH {{gateway}}/api/accounts/{{sourceId}}/status
+Content-Type: application/json
+
+{"status":"BLOCKED"}
+
+### Paiement
+POST {{gateway}}/api/transactions
+Content-Type: application/json
+
+{"accountId":"{{sourceId}}","amount":250.00,"currency":"MAD","merchantCategory":"SHOPPING","country":"MA"}
+
+### Virement
+POST {{gateway}}/api/transactions/transfer
+Content-Type: application/json
+
+{"sourceAccountId":"{{sourceId}}","targetAccountId":"{{targetId}}","amount":100.00,"currency":"MAD"}
+
+### Historique d'un compte, incluant les virements reçus
+GET {{gateway}}/api/transactions?accountId={{sourceId}}
+
+### Plafond utilisé
+GET {{gateway}}/api/transactions/config
+
+### Configuration centralisée
+GET http://localhost:19888/transaction-service/default
+
+### GraphQL comptes via gateway
+POST {{gateway}}/accounts/graphql
+Content-Type: application/json
+
+{"query":"{ accounts { id customerReference balance currency status } }"}
+
+### GraphQL création de compte
+POST {{accounts}}/graphql
+Content-Type: application/json
+
+{"query":"mutation { createAccount(input: {customerReference: \"CLIENT-GQL\", currency: \"EUR\", balance: \"500.00\"}) { id balance } }"}
+
+### GraphQL transaction
+POST {{transactions}}/graphql
+Content-Type: application/json
+
+{"query":"mutation($input: CreateTransactionInput!) { createTransaction(input: $input) { id amount createdAt } }","variables":{"input":{"accountId":"{{sourceId}}","amount":"20.00","currency":"MAD","merchantCategory":"FOOD","country":"MA"}}}
+
+### Chatbot Gemini (nécessite -WithAi)
+POST {{gateway}}/api/chat
+Content-Type: application/json
+
+{"message":"Liste mes comptes avec leurs soldes et identifiants."}
+
+### Initialiser une session MCP (conserver le header Mcp-Session-Id de la réponse)
+POST {{accounts}}/mcp
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"tp-client","version":"1.0"}}}
+
+### Ensuite : notification notifications/initialized puis tools/list et tools/call
+# Pour les appels suivants, ajouter le header Mcp-Session-Id et MCP-Protocol-Version.
